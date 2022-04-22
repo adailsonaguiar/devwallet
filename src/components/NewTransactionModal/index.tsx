@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import ReactModal from "react-modal";
 
 import modalCloseIcon from "../../assets/close.svg";
 import incomeIcon from "../../assets/income.svg";
 import outcomeIcon from "../../assets/outcome.svg";
+import { useTransaction } from "../../hooks/useTransactions";
 
 import * as S from "./styles";
 
@@ -16,9 +17,26 @@ export function NewTransactionModal({
   isOpen,
   onRequestClose,
 }: NewTransactionModalProps) {
+  const { createTransaction } = useTransaction();
+
   const [typeTransaction, setTypeTransaction] = useState<
     "deposit" | "withdraw"
   >("deposit");
+
+  const [title, setTitle] = useState("");
+  const [category, setCategory] = useState("");
+  const [value, setValue] = useState(0);
+
+  const handleCreateTransaction = (event: FormEvent) => {
+    event.preventDefault();
+    createTransaction({
+      title,
+      category,
+      amount: value,
+      type: typeTransaction,
+    });
+  };
+
   return (
     <ReactModal
       isOpen={isOpen}
@@ -33,10 +51,21 @@ export function NewTransactionModal({
       >
         <img src={modalCloseIcon} alt="Close modal" />
       </button>
-      <S.Container>
+      <S.Container onSubmit={handleCreateTransaction}>
         <h2>Cadastrar Transação</h2>
-        <input type="text" placeholder="Title" />
-        <input type="number" placeholder="Value" name="value" />
+        <input
+          type="text"
+          placeholder="Title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <input
+          type="number"
+          placeholder="Value"
+          name="value"
+          value={value}
+          onChange={(e) => setValue(Number(e.target.value))}
+        />
         <S.TypeWrapper>
           <S.ButtonType
             className="deposit"
@@ -59,7 +88,12 @@ export function NewTransactionModal({
             <span>Saída</span>
           </S.ButtonType>
         </S.TypeWrapper>
-        <input type="text" placeholder="Category" />
+        <input
+          type="text"
+          placeholder="Category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+        />
         <button type="submit">Register</button>
       </S.Container>
     </ReactModal>
